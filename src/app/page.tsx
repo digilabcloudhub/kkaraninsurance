@@ -5,9 +5,17 @@ import Link from "next/link";
 import { useState, useEffect } from "react";
 import { services, industries } from "@/app/data";
 
+const sliderImages = [
+  "/hero-team.png",
+  "/financial_plan.jpg",
+  "/general_insurance.jpg",
+  "/industry.jpg"
+];
+
 export default function Home() {
   const [servicesOpen, setServicesOpen] = useState(false);
   const [selectedService, setSelectedService] = useState<typeof services[0] | null>(null);
+  const [currentImageIndex, setCurrentImageIndex] = useState(0);
 
   // Close modal on Escape key
   useEffect(() => {
@@ -27,23 +35,20 @@ export default function Home() {
     }
   }, [selectedService]);
 
+  // Auto-slide hero images
+  useEffect(() => {
+    const interval = setInterval(() => {
+      setCurrentImageIndex((prevIndex) => (prevIndex + 1) % sliderImages.length);
+    }, 5000);
+    return () => clearInterval(interval);
+  }, []);
+
   return (
     <div className="min-h-screen bg-white text-zinc-800">
       <header className="sticky top-0 z-50 border-b border-zinc-200 bg-white/95 backdrop-blur-sm">
         <div className="mx-auto max-w-6xl px-4 sm:px-6 lg:px-8">
           <div className="flex flex-col gap-3 py-3 md:flex-row md:items-center md:justify-between">
-            <div className="flex flex-wrap items-center gap-x-6 text-sm text-zinc-600">
-              <a href="mailto:info@kkaraninsurance.co.in" className="hover:text-[var(--primary)] transition-colors">
-                info@kkaraninsurance.co.in
-              </a>
-            </div>
             <div className="flex flex-wrap items-center gap-3">
-              <Link
-                href="/#quote"
-                className="rounded-full bg-[var(--primary)] px-4 py-2 text-sm font-medium text-white hover:bg-[var(--primary-dark)] transition-colors"
-              >
-                Get a Quote
-              </Link>
             </div>
           </div>
           <nav className="flex items-center justify-between border-t border-zinc-200 py-4">
@@ -71,7 +76,7 @@ export default function Home() {
                 <button
                   type="button"
                   className="flex items-center gap-1 text-sm font-medium text-zinc-700 hover:text-[var(--primary)] transition-colors"
-                  onClick={() => setServicesOpen((prev) => !prev)}
+                  onClick={() => setServicesOpen(!servicesOpen)}
                 >
                   Expertise
                   <span className={`transition-transform ${servicesOpen ? "rotate-180" : ""}`}>▼</span>
@@ -109,23 +114,31 @@ export default function Home() {
 
       <main>
         {/* Hero Section */}
-        <section className="relative overflow-hidden py-20 md:py-32">
-          <Image
-            src="/hero-team.png"
-            alt="Kakran Insurance team discussing client risk solutions"
-            fill
-            priority
-            className="absolute inset-0 h-full w-full object-cover"
-          />
+        <section className="relative overflow-hidden py-32 md:py-48 lg:py-64 bg-slate-900">
+          {sliderImages.map((src, index) => (
+            <Image
+              key={src}
+              src={src}
+              alt={`Kakran Insurance sliding image ${index + 1}`}
+              fill
+              priority={index === 0}
+              className={`absolute inset-0 h-full w-full object-cover transition-opacity duration-1000 ${
+                index === currentImageIndex ? "opacity-100" : "opacity-0"
+              }`}
+            />
+          ))}
           <div
             className="absolute inset-0 bg-slate-900/60"
             aria-hidden="true"
           />
-          <div className="mx-auto max-w-6xl px-4 sm:px-6 lg:px-8">
+          <div className="relative mx-auto max-w-6xl px-4 sm:px-6 lg:px-8">
             <div className="relative max-w-4xl">
+              <p className="mb-4 text-xl font-bold text-blue-400 tracking-wide">
+                Kakran IMF
+              </p>
               <h1 className="mb-8 text-4xl font-extrabold tracking-tight text-white md:text-6xl leading-tight">
                 &ldquo;From Risk Identification to Protection &ndash;
-                <span className="text-blue-400"> Insurance-Led</span> Risk Management.&rdquo;
+                <span className="text-blue-400"> Insurance-Led</span> Industrial Risk Management.&rdquo;
               </h1>
               <Link
                 href="#about"
@@ -136,23 +149,49 @@ export default function Home() {
               </Link>
             </div>
           </div>
+
+          {/* Slider Navigation Dots */}
+          <div className="absolute bottom-8 left-1/2 flex -translate-x-1/2 items-center gap-3 z-10">
+            {sliderImages.map((_, index) => (
+              <button
+                key={index}
+                onClick={() => setCurrentImageIndex(index)}
+                className={`h-3 rounded-full transition-all duration-300 ${
+                  index === currentImageIndex ? "w-8 bg-blue-400" : "w-3 bg-white/50 hover:bg-white"
+                }`}
+                aria-label={`Go to slide ${index + 1}`}
+              />
+            ))}
+          </div>
         </section>
 
         {/* About Section */}
         <section id="about" className="py-16 md:py-20">
           <div className="mx-auto max-w-6xl px-4 sm:px-6 lg:px-8">
-            <p className="mb-2 text-sm font-semibold uppercase tracking-wider text-[var(--primary)]">
-              Who we are
-            </p>
-            <h2 className="mb-6 text-3xl font-bold text-zinc-900">
-              About Kakran Insurance Marketing Pvt. Ltd.
-            </h2>
-            <p className="max-w-2xl text-zinc-600 leading-relaxed">
-              Kakran Insurance Marketing Pvt. Ltd. is an IRDAI-registered Insurance Marketing Firm (IMF) committed to delivering structured, transparent and compliant insurance distribution and service support across retail and corporate segments. Our approach is built on strong governance, process discipline and responsible client engagement, operating strictly within the regulatory framework. Client information is handled with strict confidentiality and used only for authorised service and support in line with regulatory and data‑protection requirements.
-            </p>
-            <p className="mt-4 max-w-2xl text-zinc-600 leading-relaxed">
-              Founded in 2017 by Director & Principal Officer Mr. Dharam Vir Singh, a financial-services professional with over 20 years of experience, Kakran IMF brings deep expertise in risk‑management advisory, insurance planning and strategic client solutions for corporates, SMEs and individuals. Supported by dedicated Operations and Claims Support teams, and a strategic tie‑up with Insurance Samadhan for complex or disputed claims, we provide end‑to‑end support from risk assessment and policy structuring through to servicing and claims assistance.
-            </p>
+            <div className="grid gap-12 lg:grid-cols-2 lg:items-center">
+              <div>
+                <p className="mb-2 text-sm font-semibold uppercase tracking-wider text-[var(--primary)]">
+                  Who we are
+                </p>
+                <h2 className="mb-6 text-3xl font-bold text-zinc-900">
+                  About Kakran Insurance Marketing Pvt. Ltd.
+                </h2>
+                <p className="text-zinc-600 leading-relaxed">
+                  Kakran Insurance Marketing Pvt. Ltd. is an IRDAI-registered Insurance Marketing Firm (IMF) committed to delivering structured, transparent and compliant insurance distribution and service support across retail and corporate segments. Our approach is built on strong governance, process discipline and responsible client engagement, operating strictly within the regulatory framework. Client information is handled with strict confidentiality and used only for authorised service and support in line with regulatory and data‑protection requirements.
+                </p>
+                <p className="mt-4 text-zinc-600 leading-relaxed">
+                  Founded in 2017 by Director & Principal Officer Mr. Dharam Vir Singh, a financial-services professional with over 20 years of experience, Kakran IMF brings deep expertise in risk‑management advisory, insurance planning and strategic client solutions for corporates, SMEs and individuals. Supported by dedicated Operations and Claims Support teams, and a strategic tie‑up with Insurance Samadhan for complex or disputed claims, we provide end‑to‑end support from risk assessment and policy structuring through to servicing and claims assistance.
+                </p>
+              </div>
+              <div className="relative mx-auto h-72 w-full max-w-lg overflow-hidden rounded-2xl lg:h-[350px]">
+                <Image
+                  src="/about_us.png"
+                  alt="About Kakran Insurance"
+                  fill
+                  className="object-contain p-4"
+                />
+              </div>
+            </div>
             
             {/* Vision & Mission */}
             <div className="mt-12">
@@ -356,16 +395,36 @@ export default function Home() {
               <div className="grid gap-8 md:grid-cols-2 md:gap-12">
                 <div className="flex flex-col items-center gap-3 rounded-2xl bg-zinc-50 p-8">
                   <h3 className="text-xl font-semibold text-zinc-900">Phone</h3>
-                  <div className="flex flex-col items-center gap-2 text-zinc-600">
-                    <a href="tel:+919810244118" className="hover:text-[var(--primary)] transition-colors">+91 9810244118</a>
-                    <a href="tel:+919266516004" className="hover:text-[var(--primary)] transition-colors">+91 9266516004</a>
+                  <div className="flex flex-col items-start gap-3 text-zinc-600">
+                    <a href="tel:+919810244118" className="flex items-center gap-2 hover:text-[var(--primary)] transition-colors">
+                      <svg className="h-5 w-5 shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor" aria-hidden="true">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 5a2 2 0 012-2h3.28a1 1 0 01.948.684l1.498 4.493a1 1 0 01-.502 1.21l-2.257 1.13a11.042 11.042 0 005.516 5.516l1.13-2.257a1 1 0 011.21-.502l4.493 1.498a1 1 0 01.684.949V19a2 2 0 01-2 2h-1C9.716 21 3 14.284 3 6V5z" />
+                      </svg>
+                      +91 9810244118
+                    </a>
+                    <a href="tel:+919266516004" className="flex items-center gap-2 hover:text-[var(--primary)] transition-colors">
+                      <svg className="h-5 w-5 shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor" aria-hidden="true">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 5a2 2 0 012-2h3.28a1 1 0 01.948.684l1.498 4.493a1 1 0 01-.502 1.21l-2.257 1.13a11.042 11.042 0 005.516 5.516l1.13-2.257a1 1 0 011.21-.502l4.493 1.498a1 1 0 01.684.949V19a2 2 0 01-2 2h-1C9.716 21 3 14.284 3 6V5z" />
+                      </svg>
+                      +91 9266516004
+                    </a>
                   </div>
                 </div>
                 <div className="flex flex-col items-center gap-3 rounded-2xl bg-zinc-50 p-8">
                   <h3 className="text-xl font-semibold text-zinc-900">Email</h3>
-                  <div className="flex flex-col items-center gap-2 text-zinc-600">
-                    <a href="mailto:Sales.kakranimf@gmail.com" className="hover:text-[var(--primary)] transition-colors">Sales.kakranimf@gmail.com</a>
-                    <a href="mailto:Kakranimf@gmail.com" className="hover:text-[var(--primary)] transition-colors">Kakranimf@gmail.com</a>
+                  <div className="flex flex-col items-start gap-3 text-zinc-600">
+                    <a href="mailto:Sales.kakranimf@gmail.com" className="flex items-center gap-2 hover:text-[var(--primary)] transition-colors">
+                      <svg className="h-5 w-5 shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor" aria-hidden="true">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z" />
+                      </svg>
+                      Sales.kakranimf@gmail.com
+                    </a>
+                    <a href="mailto:Kakranimf@gmail.com" className="flex items-center gap-2 hover:text-[var(--primary)] transition-colors">
+                      <svg className="h-5 w-5 shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor" aria-hidden="true">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z" />
+                      </svg>
+                      Kakranimf@gmail.com
+                    </a>
                   </div>
                 </div>
               </div>
@@ -388,7 +447,7 @@ export default function Home() {
             aria-modal="true"
           >
             {selectedService.image && (
-              <div className="relative h-48 w-full shrink-0 sm:h-64">
+              <div className="relative h-64 w-full shrink-0 sm:h-80 md:h-[450px] bg-zinc-100">
                 <Image
                   src={selectedService.image}
                   alt={selectedService.title}
